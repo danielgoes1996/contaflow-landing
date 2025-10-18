@@ -1,0 +1,20 @@
+{
+  "name": "contaflow-landing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Landing de ContaFlow lista para deploy en Vercel",
+  "scripts": {
+    "build": "node scripts/update-landing-entry-version.js && NODE_ENV=production babel static/landing.source.jsx --presets @babel/preset-env,@babel/preset-react --plugins @babel/plugin-transform-optional-chaining,@babel/plugin-transform-nullish-coalescing-operator,@babel/plugin-transform-class-properties,@babel/plugin-transform-object-rest-spread --minified --no-comments --out-file static/landing.bundle.js",
+    "dev": "NODE_ENV=development babel static/landing.source.jsx --presets @babel/preset-env,@babel/preset-react --plugins @babel/plugin-transform-optional-chaining,@babel/plugin-transform-nullish-coalescing-operator,@babel/plugin-transform-class-properties,@babel/plugin-transform-object-rest-spread --out-file static/landing.bundle.js --watch"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.28.3",
+    "@babel/core": "^7.28.4",
+    "@babel/plugin-transform-class-properties": "^7.27.1",
+    "@babel/plugin-transform-nullish-coalescing-operator": "^7.27.1",
+    "@babel/plugin-transform-object-rest-spread": "^7.28.4",
+    "@babel/plugin-transform-optional-chaining": "^7.27.1",
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-react": "^7.27.1"
+  }
+}
