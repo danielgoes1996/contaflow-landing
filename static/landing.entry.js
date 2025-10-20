@@ -1,5 +1,5 @@
 const bundleCandidates = [
-  './landing.bundle.js?v=1760931522473'
+  './landing.bundle.js?v=1760933195198'
 ];
 
 (async () => {

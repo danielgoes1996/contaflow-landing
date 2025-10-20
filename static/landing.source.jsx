@@ -1,4 +1,4 @@
-const { useMemo, useEffect, useState, useRef } = React;
+const { useMemo, useEffect, useState, useRef, useCallback } = React;
 
 const ContaFlowLanding = () => {
     const [particlesLoaded, setParticlesLoaded] = useState(false);
@@ -289,6 +289,13 @@ const ContaFlowLanding = () => {
         message: "",
     });
     const [betaStatus, setBetaStatus] = useState({ state: "idle", message: "" });
+    const assetPath = useCallback((file) => {
+        if (typeof window !== "undefined" && window.location.pathname.startsWith("/static/")) {
+            return `/static/img/${file}`;
+        }
+        return `./img/${file}`;
+    }, []);
+
 
     const handleBetaInputChange = (field) => (event) => {
         const value = event.target.value;
@@ -368,9 +375,9 @@ const ContaFlowLanding = () => {
             title: "Inteligencia Operativa",
             desc: "Ejecuta conciliaciones bancarias, generación de pólizas y reportes financieros en segundos. Cada movimiento queda vinculado a su factura y a su operación bancaria, con trazabilidad explicable para que tu equipo solo valide y analice.",
         },
-    ]), []);
+    ]), [assetPath]);
 
-    const modules = useMemo(() => ([
+       const modules = useMemo(() => ([
         {
             title: "Captura inteligente omnicanal",
             description: "OCR fiscal, clasificación enriquecida y detección antifraude. Cada documento se convierte en gasto listo para auditoría.",
@@ -379,7 +386,7 @@ const ContaFlowLanding = () => {
                 "Motor antifraude: UUID vencidos y duplicados marcados al instante.",
                 "Asignación automática de proyectos, centros de costo y responsables.",
             ],
-            screenshot: "/static/img/landing-gasto.png",
+            screenshot: assetPath("landing-gasto.png"),
         },
         {
             title: "Conciliación bancaria asistida",
@@ -389,7 +396,7 @@ const ContaFlowLanding = () => {
                 "Panel de pendientes por banco y prioridad.",
                 "Aprendizaje continuo con feedback humano.",
             ],
-            screenshot: "/static/img/landing-bancos.png",
+            screenshot: assetPath("landing-bancos.png"),
         },
         {
             title: "Contabilidad y reporting autónomos",
@@ -399,9 +406,9 @@ const ContaFlowLanding = () => {
                 "Dashboards fiscales y administrativos siempre actualizados.",
                 "Historial auditable de cada decisión del copiloto.",
             ],
-            screenshot: "/static/img/landing-contexto.png",
+            screenshot: assetPath("landing-contexto.png"),
         },
-    ]), []);
+    ]), [assetPath]);
 
     const automationHighlights = useMemo(() => ([
         {
@@ -461,7 +468,7 @@ const ContaFlowLanding = () => {
                 "Clasificación enriquecida con catálogo SAT + políticas internas.",
                 "Asignación automática de responsables y proyectos.",
             ],
-            screenshot: "/static/img/landing-gasto.png",
+            screenshot: assetPath("landing-gasto.png"),
         },
         {
             title: "Conciliación bancaria sin fricción",
@@ -472,7 +479,7 @@ const ContaFlowLanding = () => {
                 "Panel de pendientes por banco con level of confidence.",
                 "Feedback loop para mejorar con cada aprobación.",
             ],
-            screenshot: "/static/img/landing-conciliacion.png",
+            screenshot: assetPath("landing-conciliacion.png"),
         },
         {
             title: "Contabilidad viva y 100% auditable",
@@ -483,35 +490,35 @@ const ContaFlowLanding = () => {
                 "KPIs gerenciales listos para juntas de dirección.",
                 "Historial de cambios y bitácora lista para auditoría.",
             ],
-            screenshot: "/static/img/landing-contexto.png",
+            screenshot: assetPath("landing-contexto.png"),
         },
-    ]), []);
+    ]), [assetPath]);
 
     const uiShowcase = useMemo(() => ([
         {
             title: "Registro de gasto en segundos",
             caption: "Carga un ticket o CFDI y observa cómo el copiloto completa la información clave al instante.",
-            image: "/static/img/landing-gasto.png",
+            image: assetPath("landing-gasto.png"),
         },
         {
             title: "Conciliación bancaria con IA",
             caption: "Cada sugerencia llega con explicación en lenguaje natural y nivel de confianza.",
-            image: "/static/img/landing-conciliacion.png",
+            image: assetPath("landing-conciliacion.png"),
         },
         {
             title: "Panel de cuentas y terminales",
             caption: "Controla bancos, terminales y efectivo desde un mismo tablero operativo.",
-            image: "/static/img/landing-bancos.png",
+            image: assetPath("landing-bancos.png"),
         },
         {
             title: "Login seguro y multiempresa",
             caption: "Gestiona múltiples razones sociales con autenticación unificada y selección de tenant.",
-            image: "/static/img/landing-login.png",
+            image: assetPath("landing-login.png"),
         },
         {
             title: "Contexto vivo de la empresa",
             caption: "La entrevista inteligente alimenta recomendaciones y clasificaciones personalizadas.",
-            image: "/static/img/landing-contexto.png",
+            image: assetPath("landing-contexto.png"),
         },
     ]), []);
 
@@ -653,7 +660,7 @@ const ContaFlowLanding = () => {
             <header className="relative z-20 bg-white/95 backdrop-blur-md border-b border-[#D9E8F5] shadow-[0_10px_40px_rgba(17,68,110,0.08)]">
                 <nav className="max-w-6xl mx-auto flex items-center justify-between px-6 py-6 text-[#11446E]">
                     <div className="flex items-center gap-3">
-                        <img src="/static/img/ContaFlow.png" alt="ContaFlow Logo" width={240} height={96} className="drop-shadow-[0_18px_40px_rgba(17,68,110,0.18)]" />
+                        <img src={assetPath("ContaFlow.png")} alt="ContaFlow Logo" width={240} height={96} className="drop-shadow-[0_18px_40px_rgba(17,68,110,0.18)]" />
                     </div>
                     <div className="hidden md:flex items-center gap-6 text-sm text-[#2D6DAA]">
                         <a href="#modules" className="hover:text-[#11446E] transition-colors">Producto</a>
@@ -1003,7 +1010,7 @@ const ContaFlowLanding = () => {
 
             {/* Footer */}
             <footer className="relative z-10 py-12 text-center text-[#5F7990] text-xs border-t border-[#D9E8F5] bg-white">
-                <img src="/static/img/ContaFlow.png" alt="ContaFlow Logo" width={150} height={60} className="mx-auto mb-4" />
+                <img src={assetPath("ContaFlow.png")} alt="ContaFlow Logo" width={150} height={60} className="mx-auto mb-4" />
                 <p className="uppercase tracking-[0.35em] text-[#2D6DAA] mb-3">ContaFlow · ERP & Contabilidad Autónoma</p>
                 <p className="text-[#46617A]">© 2025 ContaFlow — Reinventando la contabilidad con inteligencia artificial.</p>
                 <div className="flex justify-center items-center gap-4 mt-4 text-[#6B859C]">
