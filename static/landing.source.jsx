@@ -26,12 +26,12 @@ const ContaFlowLanding = () => {
                             },
                         },
                         particles: {
-                            color: { value: ["#60B97B", "#2D6DAA", "#11446E"] },
+                            color: { value: ["#B1F5D9", "#88E8B5", "#5ED694"] },
                             links: {
-                                color: "#60B97B",
+                                color: "#78E0AE",
                                 distance: 150,
                                 enable: true,
-                                opacity: 0.2,
+                                opacity: 0.3,
                                 width: 1,
                             },
                             move: {
@@ -41,10 +41,10 @@ const ContaFlowLanding = () => {
                                 direction: "none",
                                 outModes: { default: "bounce" },
                             },
-                            number: { value: 80, density: { enable: true, area: 900 } },
-                            opacity: { value: 0.4 },
+                            number: { value: 110, density: { enable: true, area: 900 } },
+                            opacity: { value: 0.8 },
                             shape: { type: "circle" },
-                            size: { value: { min: 1, max: 3 } },
+                            size: { value: { min: 1.5, max: 4.5 } },
                         },
                         detectRetina: true,
                     },
@@ -84,12 +84,13 @@ const ContaFlowLanding = () => {
                 content: "";
                 position: absolute;
                 inset: -160px -220px;
-                background: radial-gradient(circle at 20% 20%, rgba(132, 216, 168, 0.45), transparent 55%),
-                            radial-gradient(circle at 80% 30%, rgba(45, 109, 170, 0.35), transparent 60%),
-                            linear-gradient(120deg, rgba(30, 94, 156, 0.35), rgba(96, 185, 123, 0.3));
+                pointer-events: none;
+                background: radial-gradient(circle at 20% 20%, rgba(132, 216, 168, 0.28), transparent 55%),
+                            radial-gradient(circle at 80% 30%, rgba(45, 109, 170, 0.24), transparent 60%),
+                            linear-gradient(120deg, rgba(30, 94, 156, 0.24), rgba(96, 185, 123, 0.22));
                 background-size: 180% 180%;
                 filter: blur(70px);
-                opacity: 0.55;
+                opacity: 0.35;
                 border-radius: 36px;
                 animation: auroraShift 16s ease-in-out infinite alternate;
                 z-index: -1;
@@ -280,21 +281,92 @@ const ContaFlowLanding = () => {
 
         return () => observer.disconnect();
     }, []);
+    const [betaForm, setBetaForm] = useState({
+        fullName: "",
+        email: "",
+        phone: "",
+        profile: "",
+        message: "",
+    });
+    const [betaStatus, setBetaStatus] = useState({ state: "idle", message: "" });
+
+    const handleBetaInputChange = (field) => (event) => {
+        const value = event.target.value;
+        setBetaForm((prev) => ({ ...prev, [field]: value }));
+        if (betaStatus.state !== "idle") {
+            setBetaStatus({ state: "idle", message: "" });
+        }
+    };
+
+    const handleBetaProfileChange = (event) => {
+        const value = event.target.value;
+        setBetaForm((prev) => ({ ...prev, profile: value }));
+        if (betaStatus.state !== "idle") {
+            setBetaStatus({ state: "idle", message: "" });
+        }
+    };
+
+    const handleBetaSubmit = async (event) => {
+        event.preventDefault();
+        if (betaStatus.state === "submitting") {
+            return;
+        }
+
+        const payload = {
+            fullName: betaForm.fullName.trim(),
+            email: betaForm.email.trim(),
+            phone: betaForm.phone.trim(),
+            profile: betaForm.profile,
+            message: betaForm.message.trim(),
+        };
+
+        if (!payload.fullName || !payload.email || !payload.profile) {
+            setBetaStatus({ state: "error", message: "Completa los campos requeridos para continuar." });
+            return;
+        }
+
+        setBetaStatus({ state: "submitting", message: "" });
+
+        try {
+            const response = await fetch("/api/beta-request", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    fullName: payload.fullName,
+                    email: payload.email,
+                    phone: payload.phone || null,
+                    profile: payload.profile,
+                    message: payload.message || null,
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error?.detail || "No pudimos procesar tu solicitud. Intenta de nuevo.");
+            }
+
+            setBetaStatus({ state: "success", message: "Gracias por tu interés. Te contactaremos en menos de 24 horas hábiles." });
+            setBetaForm({ fullName: "", email: "", phone: "", profile: "", message: "" });
+        } catch (error) {
+            setBetaStatus({ state: "error", message: error.message || "Ocurrió un error. Intenta de nuevo." });
+        }
+    };
+
     const aiLayers = useMemo(() => ([
         {
             icon: "🧠",
-            title: "IA Cognitiva",
-            desc: "Comprende catálogos, políticas y flujos fiscales de tu empresa desde el onboarding para personalizar procesos.",
+            title: "Inteligencia Cognitiva",
+            desc: "Comprende el contexto de tu empresa desde el primer día: catálogo de cuentas, facturas y estados de cuenta. La migración es instantánea y, conforme confirmas operaciones, el sistema aprende de tu forma de trabajar, haciendo tu contabilidad más inteligente y eficiente.",
         },
         {
             icon: "⚡",
-            title: "IA de Procesamiento",
-            desc: "Clasifica tickets, CFDI y transferencias con precisión contable. Aprendizaje continuo con cada confirmación.",
+            title: "Inteligencia de Procesamiento",
+            desc: "Reconoce la naturaleza de cada operación y clasifica automáticamente gastos, ingresos, traspasos y facturas, mapeándolos al catálogo de cuentas del SAT y a tus cuentas internas. Genera asientos y pólizas en las cuentas correctas y puede convertir tickets en CFDI cuando llegan por WhatsApp.",
         },
         {
             icon: "🤖",
-            title: "IA Operativa",
-            desc: "Conciliación bancaria, pólizas y reportes automáticos. Todo con trazabilidad explicable al detalle.",
+            title: "Inteligencia Operativa",
+            desc: "Ejecuta conciliaciones bancarias, generación de pólizas y reportes financieros en segundos. Cada movimiento queda vinculado a su factura y a su operación bancaria, con trazabilidad explicable para que tu equipo solo valide y analice.",
         },
     ]), []);
 
@@ -307,7 +379,7 @@ const ContaFlowLanding = () => {
                 "Motor antifraude: UUID vencidos y duplicados marcados al instante.",
                 "Asignación automática de proyectos, centros de costo y responsables.",
             ],
-            screenshot: "/screenshots/captura-omnicanal.png",
+            screenshot: "/static/img/landing-gasto.png",
         },
         {
             title: "Conciliación bancaria asistida",
@@ -317,7 +389,7 @@ const ContaFlowLanding = () => {
                 "Panel de pendientes por banco y prioridad.",
                 "Aprendizaje continuo con feedback humano.",
             ],
-            screenshot: "/screenshots/conciliacion-inteligente.png",
+            screenshot: "/static/img/landing-bancos.png",
         },
         {
             title: "Contabilidad y reporting autónomos",
@@ -327,7 +399,55 @@ const ContaFlowLanding = () => {
                 "Dashboards fiscales y administrativos siempre actualizados.",
                 "Historial auditable de cada decisión del copiloto.",
             ],
-            screenshot: "/screenshots/contabilidad-asistida.png",
+            screenshot: "/static/img/landing-contexto.png",
+        },
+    ]), []);
+
+    const automationHighlights = useMemo(() => ([
+        {
+            icon: "🏦",
+            title: "Conciliaciones bancarias automáticas",
+            items: [
+                "Compara al instante los movimientos bancarios con las facturas y pólizas registradas.",
+                "Detecta diferencias, pagos duplicados y operaciones pendientes antes de que se acumulen.",
+                "La conciliación deja de ser una tarea manual y se convierte en un proceso continuo y confiable.",
+            ],
+        },
+        {
+            icon: "📘",
+            title: "Registro automático de pólizas contables",
+            items: [
+                "Cada CFDI, ticket o movimiento bancario se convierte en un asiento contable listo.",
+                "Generamos pólizas de ingreso, egreso o diario con las cuentas correctas e importes exactos.",
+                "Tú solo revisas; el sistema captura por ti y enlaza los soportes correspondientes.",
+            ],
+        },
+        {
+            icon: "📄",
+            title: "Validación y control de CFDIs y comprobantes",
+            items: [
+                "Valida CFDIs en segundos para detectar cancelaciones, duplicados o errores de RFC.",
+                "Evita diferencias fiscales y retrabajo en cierres o auditorías.",
+                "Mantén la contabilidad limpia desde la primera revisión.",
+            ],
+        },
+        {
+            icon: "💵",
+            title: "Control diario de ingresos y gastos",
+            items: [
+                "Cada movimiento queda registrado y clasificado en tiempo real por proyecto, responsable o centro de costo.",
+                "Visualiza gastos operativos, ingresos recurrentes y flujos extraordinarios sin hojas de cálculo.",
+                "Visibilidad completa del flujo operativo para ti y tus clientes.",
+            ],
+        },
+        {
+            icon: "🗂️",
+            title: "Archivo contable vivo y trazable",
+            items: [
+                "CFDIs, tickets y estados de cuenta organizados por operación, fecha y relación bancaria.",
+                "La información deja de estar dispersa y se vuelve una base auditable lista para reportes.",
+                "Todo con trazabilidad completa para gerencia, auditoría o fiscalización.",
+            ],
         },
     ]), []);
 
@@ -341,7 +461,7 @@ const ContaFlowLanding = () => {
                 "Clasificación enriquecida con catálogo SAT + políticas internas.",
                 "Asignación automática de responsables y proyectos.",
             ],
-            screenshot: "/screenshots/flow-captura.png",
+            screenshot: "/static/img/landing-gasto.png",
         },
         {
             title: "Conciliación bancaria sin fricción",
@@ -352,7 +472,7 @@ const ContaFlowLanding = () => {
                 "Panel de pendientes por banco con level of confidence.",
                 "Feedback loop para mejorar con cada aprobación.",
             ],
-            screenshot: "/screenshots/flow-conciliacion.png",
+            screenshot: "/static/img/landing-conciliacion.png",
         },
         {
             title: "Contabilidad viva y 100% auditable",
@@ -363,7 +483,35 @@ const ContaFlowLanding = () => {
                 "KPIs gerenciales listos para juntas de dirección.",
                 "Historial de cambios y bitácora lista para auditoría.",
             ],
-            screenshot: "/screenshots/flow-reporting.png",
+            screenshot: "/static/img/landing-contexto.png",
+        },
+    ]), []);
+
+    const uiShowcase = useMemo(() => ([
+        {
+            title: "Registro de gasto en segundos",
+            caption: "Carga un ticket o CFDI y observa cómo el copiloto completa la información clave al instante.",
+            image: "/static/img/landing-gasto.png",
+        },
+        {
+            title: "Conciliación bancaria con IA",
+            caption: "Cada sugerencia llega con explicación en lenguaje natural y nivel de confianza.",
+            image: "/static/img/landing-conciliacion.png",
+        },
+        {
+            title: "Panel de cuentas y terminales",
+            caption: "Controla bancos, terminales y efectivo desde un mismo tablero operativo.",
+            image: "/static/img/landing-bancos.png",
+        },
+        {
+            title: "Login seguro y multiempresa",
+            caption: "Gestiona múltiples razones sociales con autenticación unificada y selección de tenant.",
+            image: "/static/img/landing-login.png",
+        },
+        {
+            title: "Contexto vivo de la empresa",
+            caption: "La entrevista inteligente alimenta recomendaciones y clasificaciones personalizadas.",
+            image: "/static/img/landing-contexto.png",
         },
     ]), []);
 
@@ -471,18 +619,26 @@ const ContaFlowLanding = () => {
     };
 
     const PillButton = ({ children, variant = "solid", href }) => {
-        const baseStyles = "pill-button rounded-full px-8 py-3 text-sm font-semibold transition-transform transform hover:-translate-y-0.5";
+        const baseStyles = "pill-button rounded-full px-8 py-3 text-sm font-semibold transition-colors shadow-sm hover:shadow-md";
         const styles =
             variant === "ghost"
                 ? "pill-button--ghost border border-[#D9E8F5] text-[#11446E] hover:bg-[#F2F9FF]"
                 : "pill-button--solid bg-[#60B97B] hover:bg-[#4FA771] text-white shadow-[0_18px_40px_rgba(96,185,123,0.35)]";
 
-        const Component = href ? "a" : "button";
+        
+
+        if (href) {
+            return (
+                <a href={href} className={`${baseStyles} ${styles}`}>
+                    {children}
+                </a>
+            );
+        }
 
         return (
-            <Component href={href} className={`${baseStyles} ${styles}`}>
+            <button type="button" className={`${baseStyles} ${styles}`}>
                 {children}
-            </Component>
+            </button>
         );
     };
 
@@ -490,45 +646,49 @@ const ContaFlowLanding = () => {
         <div className="relative min-h-screen flex flex-col bg-gradient-to-b from-white via-white to-[#F1F8F5] text-[#11446E] font-sans overflow-hidden">
             <div id="hero-particles" className="absolute inset-0 pointer-events-none" />
             {!particlesLoaded && (
-                <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white via-white to-[#E4F1FD]" />
+                <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-[#0F3656] via-[#11446E] to-transparent" />
             )}
 
             {/* Navbar */}
             <header className="relative z-20 bg-white/95 backdrop-blur-md border-b border-[#D9E8F5] shadow-[0_10px_40px_rgba(17,68,110,0.08)]">
                 <nav className="max-w-6xl mx-auto flex items-center justify-between px-6 py-6 text-[#11446E]">
                     <div className="flex items-center gap-3">
-                        <img src="/img/ContaFlow.png" alt="ContaFlow Logo" width={240} height={96} className="drop-shadow-[0_18px_40px_rgba(17,68,110,0.18)]" />
+                        <img src="/static/img/ContaFlow.png" alt="ContaFlow Logo" width={240} height={96} className="drop-shadow-[0_18px_40px_rgba(17,68,110,0.18)]" />
                     </div>
                     <div className="hidden md:flex items-center gap-6 text-sm text-[#2D6DAA]">
                         <a href="#modules" className="hover:text-[#11446E] transition-colors">Producto</a>
                         <a href="#flows" className="hover:text-[#11446E] transition-colors">Flujos</a>
                         <a href="#timeline" className="hover:text-[#11446E] transition-colors">Cómo funciona</a>
-                        <a href="#cta" className="hover:text-[#11446E] transition-colors">Beta</a>
+                        <a href="#beta" className="hover:text-[#11446E] transition-colors">Beta</a>
                     </div>
                     <div className="flex items-center gap-3">
-                        <PillButton variant="ghost" href="#login">Iniciar sesión</PillButton>
-                        <PillButton href="#cta">Unirme a la beta</PillButton>
+                        
+                        <PillButton href="#beta">Quiero probarlo</PillButton>
                     </div>
                 </nav>
             </header>
 
             {/* Hero */}
-            <section className="relative z-10 py-24 px-6">
-                <div className="pointer-events-none absolute inset-x-0 -top-32 h-[420px] bg-gradient-to-b from-[#E6F1FD] via-white to-transparent blur-2xl opacity-80" />
+            <section className="relative z-10 py-24 px-6 bg-gradient-to-b from-[#0F3656] via-[#11446E] to-transparent text-white">
+                <div className="pointer-events-none absolute inset-x-0 -top-32 h-[420px] bg-gradient-to-b from-white/15 via-white/5 to-transparent blur-3xl opacity-80" />
                 <div className="relative flex flex-col items-center text-center max-w-6xl mx-auto gap-12 hero-aurora">
                     <div className="flex flex-col items-center gap-6 reveal-on-scroll" data-animate="reveal">
-                        <div className="inline-flex items-center gap-3 bg-white border border-[#D9E8F5] px-5 py-2.5 rounded-full text-xs uppercase tracking-[0.32em] text-[#2D6DAA] shadow-[0_12px_40px_rgba(45,109,170,0.12)]">
-                            ERP + IA copiloto + Contabilidad autónoma
+                        <div className="inline-flex items-center gap-3 bg-white/95 border border-[#D9E8F5] px-5 py-2.5 rounded-full text-xs uppercase tracking-[0.32em] text-[#11446E] shadow-[0_18px_45px_rgba(17,68,110,0.25)]">
+                            Contabilidad con precisión fiscal, trazabilidad total y cero captura manual
                         </div>
-                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight bg-gradient-to-r from-[#84D8A8] via-[#3C7FC0] to-[#1E5E9C] text-transparent bg-clip-text drop-shadow-lg">
-                            Contabilidad que piensa, concilia y explica cada decisión
+                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight text-white drop-shadow-[0_22px_45px_rgba(0,0,0,0.35)]">
+                            Contabilidad inteligente, impulsada por IA.
                         </h1>
-                        <p className="text-lg md:text-xl text-[#40566C] max-w-3xl">
-                            ContaFlow libera a tu equipo contable de la captura manual y te entrega visibilidad financiera en tiempo real. AI copilots que trabajan con rigor de despacho y velocidad de startup.
+                        <p className="text-lg md:text-xl text-[#E6F0FA] mb-8">
+                            Automatiza captura, clasificación y conciliación con un copiloto que aprende de tu despacho.
                         </p>
                         <div className="flex flex-col md:flex-row gap-4">
-                            <PillButton href="#cta">Solicitar demo en vivo</PillButton>
-                        <PillButton variant="ghost" href="#demo">Ver flujo interactivo</PillButton>
+                            <PillButton href="#beta">
+                                Quiero probarlo
+                            </PillButton>
+                            <a href="#flows" className="text-sm font-semibold text-[#B7F0D5] hover:text-white transition-colors underline-offset-4 hover:underline">
+                                Ver cómo funciona →
+                            </a>
                         </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full text-left reveal-on-scroll" data-animate="reveal">
@@ -544,7 +704,7 @@ const ContaFlowLanding = () => {
                 <div className="pointer-events-none absolute inset-x-12 top-12 h-64 rounded-[48px] bg-gradient-to-r from-[#E8F6EE] via-white to-[#E6F1FD] blur-2xl opacity-80" />
                 <div className="relative max-w-6xl mx-auto text-center mb-16 reveal-on-scroll" data-animate="reveal">
                     <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[#84D8A8] to-[#3C7FC0] text-transparent bg-clip-text">
-                        Tres capas de inteligencia que aprenden de tu negocio
+                        Tres inteligencias que aprenden de tu negocio
                     </h2>
                     <p className="text-[#40566C] text-lg max-w-3xl mx-auto">
                         Combinamos modelos cognitivos, operativos y de decisión para automatizar todo el ciclo contable. Tú eliges qué aprueba la IA y qué decides validar.
@@ -574,7 +734,7 @@ const ContaFlowLanding = () => {
                         El Sistema operativo contable que evoluciona contigo
                     </h2>
                     <p className="text-[#40566C] text-lg max-w-3xl mx-auto">
-                        Cada módulo combina automatización con supervisión asistida. Control total con trazabilidad 100% auditable.
+                        Nuestra tecnología combina tres niveles de inteligencia que trabajan en conjunto para automatizar todo el ciclo contable. Tú eliges qué aprueba la IA y qué prefieres validar.
                     </p>
                 </div>
 
@@ -602,11 +762,12 @@ const ContaFlowLanding = () => {
                                 </ul>
                             </div>
                             <div className="relative rounded-3xl overflow-hidden border border-[#D9E8F5] bg-white shadow-[0_22px_60px_rgba(17,68,110,0.12)] parallax-card" data-parallax="tilt">
-                                <img src={module.screenshot} alt={`Screenshot ${module.title}`} className="w-full h-full object-cover opacity-95" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#11446E]/18 via-transparent to-transparent" />
-                                <p className="absolute bottom-4 left-4 text-xs uppercase tracking-widest text-[#2D6DAA]">
-                                    Placeholder: reemplaza con screenshot real
-                                </p>
+                                <img src={module.screenshot} alt={`Vista previa del módulo ${module.title}`} className="w-full h-full object-cover" />
+                                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white via-white/60 to-transparent" />
+                                <div className="pointer-events-none absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-[#11446E] shadow-[0_12px_30px_rgba(17,68,110,0.12)]">
+                                    <span className="h-2.5 w-2.5 rounded-full bg-[#60B97B]" />
+                                    Vista previa del módulo
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -648,14 +809,52 @@ const ContaFlowLanding = () => {
                                 </ul>
                             </div>
                             <div className="relative rounded-3xl overflow-hidden border border-[#D9E8F5] bg-white shadow-[0_22px_60px_rgba(17,68,110,0.12)] parallax-card" data-parallax="tilt">
-                                <img src={flow.screenshot} alt={`Flow screenshot ${flow.title}`} className="w-full h-full object-cover opacity-95" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#11446E]/18 via-transparent to-transparent" />
-                                <p className="absolute bottom-4 left-4 text-xs uppercase tracking-widest text-[#2D6DAA]">
-                                    Placeholder: reemplaza con demo del flujo
-                                </p>
+                                <img src={flow.screenshot} alt={`Vista previa del flujo ${flow.title}`} className="w-full h-full object-cover" />
+                                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white via-white/60 to-transparent" />
+                                <div className="pointer-events-none absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-[#11446E] shadow-[0_12px_30px_rgba(17,68,110,0.12)]">
+                                    <span className="h-2.5 w-2.5 rounded-full bg-[#2D6DAA]" />
+                                    Vista previa del flujo
+                                </div>
                             </div>
                         </div>
                     ))}
+                </div>
+            </section>
+
+            {/* Automation Highlights */}
+            <section className="relative z-10 py-24 px-8 bg-gradient-to-b from-white via-[#F6FBFF] to-white overflow-hidden" id="automation">
+                <div className="pointer-events-none absolute inset-x-12 top-0 h-56 bg-gradient-to-b from-[#E8F6EE] via-transparent to-transparent blur-2xl opacity-70" />
+                <div className="relative max-w-6xl mx-auto text-center mb-16 reveal-on-scroll" data-animate="reveal">
+                    <h2 className="text-4xl font-bold mb-4 text-[#11446E]">🧮 Lo que automatizamos por ti</h2>
+                    <p className="text-[#40566C] text-lg max-w-3xl mx-auto">
+                        Olvídate de capturar pólizas, revisar facturas o cuadrar bancos. Nuestra tecnología toma los puntos más críticos del día a día del contador para que la contabilidad llegue lista.
+                    </p>
+                </div>
+
+                <div className="relative max-w-6xl mx-auto grid gap-8 lg:grid-cols-2 xl:grid-cols-3">
+                    {automationHighlights.map((item) => (
+                        <div key={item.title} className="reveal-on-scroll group flex flex-col gap-4 rounded-3xl border border-[#D9E8F5] bg-white/95 p-6 shadow-[0_22px_60px_rgba(17,68,110,0.10)] transition hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(17,68,110,0.18)]" data-animate="reveal">
+                            <div className="flex items-center gap-3 text-[#11446E]">
+                                <span className="text-2xl">{item.icon}</span>
+                                <h3 className="text-xl font-semibold">{item.title}</h3>
+                            </div>
+                            <ul className="space-y-3 text-sm text-[#46617A] leading-relaxed">
+                                {item.items.map((bullet) => (
+                                    <li key={bullet} className="flex gap-2">
+                                        <span className="mt-1 text-[#60B97B]">•</span>
+                                        <span>{bullet}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="relative max-w-6xl mx-auto mt-16 flex flex-col items-center gap-3 text-center reveal-on-scroll" data-animate="reveal">
+                    <span className="text-sm uppercase tracking-[0.3em] text-[#2D6DAA]">Nosotros capturamos</span>
+                    <p className="text-lg font-semibold text-[#11446E]">
+                        Capturamos, validamos y conciliamos por ti. Tú solo verificas y entregas una contabilidad lista.
+                    </p>
                 </div>
             </section>
 
@@ -733,28 +932,78 @@ const ContaFlowLanding = () => {
                 </div>
             </section>
 
-            {/* CTA */}
-            <section className="relative z-10 py-32 px-8 bg-white" id="cta">
+            <section className="relative z-10 py-32 px-8 bg-white" id="beta">
                 <div className="relative max-w-4xl mx-auto">
                     <div className="absolute inset-0 rounded-[36px] bg-gradient-to-r from-[#60B97B] via-[#2D6DAA] to-[#11446E] opacity-30 blur-2xl" />
-                    <div className="relative text-center border border-[#D9E8F5] rounded-[32px] bg-white/95 px-10 md:px-16 py-16 shadow-[0_28px_70px_rgba(17,68,110,0.14)] cta-card reveal-on-scroll" data-animate="reveal">
-                        <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-snug bg-gradient-to-r from-[#11446E] via-[#2D6DAA] to-[#60B97B] text-transparent bg-clip-text">
-                            Da el salto a la contabilidad autónoma con IA explicable
-                        </h2>
-                        <p className="text-lg text-[#40566C] mb-10">
-                            Únete a la beta privada y descubre cómo ContaFlow libera horas de tu equipo y documenta cada decisión para auditorías sin estrés.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <PillButton href="https://cal.com/">Agendar demo</PillButton>
-                        <PillButton variant="ghost" href="#login">Crear cuenta beta</PillButton>
+                    <div className="relative border border-[#D9E8F5] rounded-[32px] bg-white/95 px-10 md:px-16 py-16 shadow-[0_28px_70px_rgba(17,68,110,0.14)] cta-card reveal-on-scroll" data-animate="reveal">
+                        <div className="text-center mb-8">
+                            <h2 className="text-4xl md:text-5xl font-bold leading-snug text-[#11446E]">Solicita acceso a la beta privada</h2>
+                            <p className="text-lg text-[#40566C] mt-3">Queremos conocer cómo llevas tu contabilidad para activar tu cuenta con el copiloto adecuado.</p>
                         </div>
+                        <form className="grid gap-6" id="beta-form" onSubmit={handleBetaSubmit} noValidate>
+                            <div className="grid md:grid-cols-2 gap-5">
+                                <div className="flex flex-col text-left">
+                                    <label className="text-sm font-semibold text-[#11446E] mb-2">Nombre completo</label>
+                                    <input type="text" name="fullName" placeholder="Tu nombre" required value={betaForm.fullName} onChange={handleBetaInputChange("fullName")} className="rounded-2xl border border-[#D9E8F5] bg-white px-4 py-3 text-sm text-[#11446E] shadow-inner focus:border-[#2D6DAA] focus:outline-none focus:ring-2 focus:ring-[#2D6DAA]/20" />
+                                </div>
+                                <div className="flex flex-col text-left">
+                                    <label className="text-sm font-semibold text-[#11446E] mb-2">Correo electrónico</label>
+                                    <input type="email" name="email" placeholder="nombre@empresa.com" required value={betaForm.email} onChange={handleBetaInputChange("email")} className="rounded-2xl border border-[#D9E8F5] bg-white px-4 py-3 text-sm text-[#11446E] shadow-inner focus:border-[#2D6DAA] focus:outline-none focus:ring-2 focus:ring-[#2D6DAA]/20" />
+                                </div>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-5">
+                                <div className="flex flex-col text-left">
+                                    <label className="text-sm font-semibold text-[#11446E] mb-2">Teléfono o WhatsApp (opcional)</label>
+                                    <input type="tel" name="phone" placeholder="(+52) 55 1234 5678" value={betaForm.phone} onChange={handleBetaInputChange("phone")} className="rounded-2xl border border-[#D9E8F5] bg-white px-4 py-3 text-sm text-[#11446E] shadow-inner focus:border-[#2D6DAA] focus:outline-none focus:ring-2 focus:ring-[#2D6DAA]/20" />
+                                </div>
+                                <div className="flex flex-col text-left">
+                                    <label className="text-sm font-semibold text-[#11446E] mb-2">¿Quién eres?</label>
+                                    <div className="rounded-2xl border border-[#D9E8F5] bg-white px-4 py-3 text-sm text-[#11446E] shadow-inner space-y-2">
+                                        <label className="flex items-center gap-2">
+                                            <input type="radio" name="profile" value="empresa" required className="accent-[#60B97B]" checked={betaForm.profile === "empresa"} onChange={handleBetaProfileChange} /> Empresa que maneja su contabilidad
+                                        </label>
+                                        <label className="flex items-center gap-2">
+                                            <input type="radio" name="profile" value="contador" className="accent-[#60B97B]" checked={betaForm.profile === "contador"} onChange={handleBetaProfileChange} /> Contador independiente / freelance
+                                        </label>
+                                        <label className="flex items-center gap-2">
+                                            <input type="radio" name="profile" value="despacho" className="accent-[#60B97B]" checked={betaForm.profile === "despacho"} onChange={handleBetaProfileChange} /> Despacho contable
+                                        </label>
+                                        <label className="flex items-center gap-2">
+                                            <input type="radio" name="profile" value="otro" className="accent-[#60B97B]" checked={betaForm.profile === "otro"} onChange={handleBetaProfileChange} /> Otro
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="text-left text-xs text-[#46617A] space-y-2">
+                                <p>Prometemos respetar tu bandeja. Solo usaremos tu correo para avisarte de avances y activar tu cuenta antes del lanzamiento general.</p>
+                                <label className="flex items-start gap-2">
+                                    <input type="checkbox" name="terms" required className="mt-1 accent-[#60B97B]" />
+                                    <span>Acepto recibir comunicaciones sobre la beta privada y autorizo a ContaFlow a contactarme para coordinar la activación.</span>
+                                </label>
+                            </div>
+                            {betaStatus.state === "success" && (
+                                <div className="rounded-2xl border border-[#60B97B]/40 bg-[#E6F6ED] px-4 py-3 text-sm text-[#1F6F4C]" role="status">
+                                    {betaStatus.message}
+                                </div>
+                            )}
+                            {betaStatus.state === "error" && (
+                                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600" role="alert">
+                                    {betaStatus.message || "Revisa la información e inténtalo nuevamente."}
+                                </div>
+                            )}
+
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-4">
+                                <button type="submit" disabled={betaStatus.state === "submitting"} className="pill-button rounded-full px-8 py-3 text-sm font-semibold bg-[#60B97B] hover:bg-[#4FA771] text-white shadow-[0_18px_40px_rgba(96,185,123,0.35)] transition disabled:opacity-70 disabled:cursor-not-allowed">{betaStatus.state === "submitting" ? "Enviando…" : "Enviar solicitud"}</button>
+                                <p className="text-xs text-[#46617A] flex items-center">Nuestro equipo responde en menos de 24 horas hábiles.</p>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </section>
 
             {/* Footer */}
             <footer className="relative z-10 py-12 text-center text-[#5F7990] text-xs border-t border-[#D9E8F5] bg-white">
-                <img src="/img/ContaFlow.png" alt="ContaFlow Logo" width={150} height={60} className="mx-auto mb-4" />
+                <img src="/static/img/ContaFlow.png" alt="ContaFlow Logo" width={150} height={60} className="mx-auto mb-4" />
                 <p className="uppercase tracking-[0.35em] text-[#2D6DAA] mb-3">ContaFlow · ERP & Contabilidad Autónoma</p>
                 <p className="text-[#46617A]">© 2025 ContaFlow — Reinventando la contabilidad con inteligencia artificial.</p>
                 <div className="flex justify-center items-center gap-4 mt-4 text-[#6B859C]">
